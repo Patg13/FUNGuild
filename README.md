@@ -2,6 +2,8 @@
 
 <b><i>Over 13,000 fungal taxa now included in the database</i>!</b>
 
+This version of FUNGuild support local database use (it include a script to download the Fungal database in the correct format
+
 <h3>Quick start</h3>
 
 The FUNGuild.py script was written under Python 3 environment. If you don't have a Python 3 environment, we recommend to install Anaconda (https://www.anaconda.com/products/individual).
