@@ -84,6 +84,7 @@ parser.add_argument("-otu", help="Path and file name of the OTU table. The scrip
 parser.add_argument("-m", "--matched", action="store_true", help="Ask the script to output a otu table with function assigned OTUs")
 parser.add_argument("-u", "--unmatched", action="store_true", help="Ask the script to output a otu table with function assigned OTUs")
 parser.add_argument("-db", choices=['fungi','nematode'], default='fungi', help="Assign a specified database to the script")
+parser.add_argument("-db_loc",required=False, help="Local database path (if not used, will fetch remote database")
 args = parser.parse_args()
 
 #input files
@@ -119,12 +120,20 @@ elif database_name == 'nematode':
 import requests
 import json
 
-print('Connecting with FUNGuild database ...')
-db_url = requests.get(url)
-#db_url = db_url.content.decode('utf-8').split('\n')[6].strip('[').strip(']</body>').replace('} , {', '} \n {').split('\n')
-db_url = db_url.content.decode('utf-8')
-db_url = db_url.split('\n')[6].strip('</body>')
-db_url = json.loads(db_url)
+
+if args.db_loc == "" or args.db_loc == None:
+    print('Connecting with FUNGuild database ...')
+    db_url = requests.get(url)
+    #db_url = db_url.content.decode('utf-8').split('\n')[6].strip('[').strip(']</body>').replace('} , {', '} \n {').split('\n')
+    db_url = db_url.content.decode('utf-8')
+    db_url = db_url.split('\n')[6].strip('</body>')
+    db_url = json.loads(db_url)
+else:
+    print('Import local FUNGuild database ...')
+    datab=open(args.db_loc,'r',encoding="utf-8")
+    databR=datab.read()
+    datab.close()
+    db_url = json.loads(databR)
 db = []
 # For all species key works (replace space with underscore)
 for record in db_url:

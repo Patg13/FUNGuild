@@ -60,6 +60,7 @@ taxa_parser_group.add_argument('-column', default='taxonomy', help='Value of the
 taxa_parser_group.add_argument('-classifier', default='unite', choices=['unite', 'sintax'], help='The type of taxonomic string. Default: unite')
 guild_parser_group = parser.add_argument_group('Arguments for guild parser', 'Step2: search the extracted taxonomy against FUNGuild.')
 guild_parser_group.add_argument('-taxa', default='otu_table.taxa.txt', help='The output from taxa parser.')
+guild_parser_group.add_argument('-db', required=False, help='Local database to use for assignation (do not specify to use remote database)')
 args = parser.parse_args()
 
 def taxa_parser(otu, fmt, column, classifier):
@@ -143,7 +144,7 @@ def taxa_parser(otu, fmt, column, classifier):
             f.write('%s\n' % '\t'.join(line))
     print('Parsed taxa file: {0}'.format(output_taxa))        
 
-def guild_parser(taxa):
+def guild_parser(taxa,database):
     taxa_input = taxa
     url = 'https://mycoportal.org/fdex/services/api/db_return.php?dbReturn=Yes'
     # Output file name
@@ -154,8 +155,13 @@ def guild_parser(taxa):
     	output_file = taxa_input[:dot_position[-1]] + '.guilds.txt'
 
     # Import database
-    print('Connecting with FUNGuild database ...')
-    db_content = json.load(urlopen(url + '&pp=1'))
+    if database == "" or database == None:
+        print('Connecting with FUNGuild database ...')
+        db_content = json.load(urlopen(url + '&pp=1'))
+    else:
+        print('Parsing local database...')
+        db_file=open(database,'r')
+        db_content = json.load(db_file)
     db = []
     for current_record in db_content:
         #current_record = json.loads(record)
@@ -233,8 +239,9 @@ if args.action == 'taxa':
 elif args.action == 'guild':
     print('Guild parser initiated')
     taxa = args.taxa
+    database = args.db
     print('Loading taxa file: {0}'.format(taxa))
-    guild_parser(taxa)
+    guild_parser(taxa,database)
 else:
     print('Unknown function, please check the manual using -h or --help.')
 
