@@ -27,7 +27,7 @@ optional arguments:
   -otu OTU         Path and file name of the OTU table. The script will try to
                    detect the delimiters in the file, but tab or csv are
                    preferred formats.
-  -db              Database to use ('fungi' or 'nematode') [default:fungi]
+  -db              Database to use ('remote_fungi' or 'remote_nematode' or local database path) [default:remote_fungi]
   -m, --matched    Ask the script to output an otu table containing only OTUs
   		   for which functional assignments have been made
   -u, --unmatched  Ask the script to output an otu table containing only OTUs
@@ -83,8 +83,8 @@ parser.add_argument("-otu", help="Path and file name of the OTU table. The scrip
 					"in the file, but tab or csv are preferred formats.")
 parser.add_argument("-m", "--matched", action="store_true", help="Ask the script to output a otu table with function assigned OTUs")
 parser.add_argument("-u", "--unmatched", action="store_true", help="Ask the script to output a otu table with function assigned OTUs")
-parser.add_argument("-db", choices=['fungi','nematode'], default='fungi', help="Assign a specified database to the script")
-parser.add_argument("-db_loc",required=False, help="Local database path (if not used, will fetch remote database")
+parser.add_argument("-db", metavar=['remote_fungi','remote_nematode','local_database_path'], default='remote_fungi', help="Assign a specified database to the script")
+#parser.add_argument("-db_loc",required=False, help="Local database path (if not used, will fetch remote database")
 args = parser.parse_args()
 
 #input files
@@ -111,17 +111,18 @@ else:
 # Import Function Database from GitHub, and get it ready.##################################
 print("FunGuild v1.1 Beta")
 
+url=""
 database_name = args.db
-if database_name == 'fungi':
+if database_name == 'remote_fungi':
     url = 'http://www.stbates.org/funguild_db_2.php'
-elif database_name == 'nematode':
+elif database_name == 'remote_nematode':
     url = 'http://www.stbates.org/nemaguild_db.php'
 
 import requests
 import json
 
 
-if args.db_loc == "" or args.db_loc == None:
+if url != "":
     print('Connecting with FUNGuild database ...')
     db_url = requests.get(url)
     #db_url = db_url.content.decode('utf-8').split('\n')[6].strip('[').strip(']</body>').replace('} , {', '} \n {').split('\n')
@@ -130,7 +131,7 @@ if args.db_loc == "" or args.db_loc == None:
     db_url = json.loads(db_url)
 else:
     print('Import local FUNGuild database ...')
-    datab=open(args.db_loc,'r',encoding="utf-8")
+    datab=open(args.db,'r',encoding="utf-8")
     databR=datab.read()
     datab.close()
     db_url = json.loads(databR)
